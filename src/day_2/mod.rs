@@ -2,42 +2,28 @@ use std::fs;
 use std::path::Path;
 
 fn is_report_safe(report: &[i64]) -> bool {
-  let mut is_asc = false;
-
-  let mut last = report[0];
-
-  for i in 1..report.len() {
-    let _is_asc = report[i] > last;
-
-    if i == 1 {
-      is_asc = _is_asc;
-    }
-    else if is_asc != _is_asc {
-      return false;
-    };
-
-    let diff = (report[i] - last).abs();
-
-    if (diff < 1) || (diff > 3) {
-      return false;
-    }
-
-    last = report[i];
+  if report.len() < 2 {
+    return true;
   }
 
-  true
+  let is_asc = report[1] > report[0];
+
+  report.windows(2).all(|w| {
+    let delta = (w[1] - w[0]).abs();
+    ((w[1] > w[0]) == is_asc) && (1..=3).contains(&delta)
+  })
 }
 
 fn is_report_safe_with_dampener(report: &[i64]) -> bool {
-  for i in 0..report.len() {
-    let r_without_i = [&report[..i], &report[i + 1..]].concat();
-
-    if is_report_safe(&r_without_i) {
-      return true;
-    }
-  }
-
-  false
+  (0..report.len()).any(|i| {
+    is_report_safe(
+      &report
+        .iter()
+        .enumerate()
+        .filter_map(|(j, &n)| (i != j).then_some(n))
+        .collect::<Vec<i64>>()
+    )
+  })
 }
 
 pub fn solve() {
@@ -48,11 +34,15 @@ pub fn solve() {
     std::process::exit(1);
   });
 
-  let reports: Vec<Vec<i64>> = input_str.lines().map(
-    |line| line.split_whitespace().map(
-      |n| n.parse().expect("invalid number")
-    ).collect()
-  ).collect();
+  let reports: Vec<Vec<i64>> = input_str
+    .lines()
+    .map(|line| {
+      line
+        .split_whitespace()
+        .map(|n| n.parse().expect("Invalid number"))
+        .collect()
+    })
+    .collect();
 
   let (safe_reps, unsafe_reps): (Vec<&Vec<i64>>, Vec<&Vec<i64>>) = reports.iter().partition(
     |r| is_report_safe(r)
