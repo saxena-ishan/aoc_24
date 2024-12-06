@@ -4,6 +4,7 @@ pub mod day_1;
 pub mod day_2;
 pub mod day_3;
 pub mod day_4;
+pub mod day_5;
 
 #[derive(Parser)]
 struct Args {
@@ -19,6 +20,7 @@ fn main() {
         2 => day_2::solve(),
         3 => day_3::solve(),
         4 => day_4::solve(),
+        5 => day_5::solve(),
         _ => eprintln!("invalid arg"),
     }
 }
